@@ -83,7 +83,7 @@ class DAOHelpers {
 
     const admin = address ? address : deployer.address;
     console.group();
-    console.log(italic('\nDeploying Admin plugin...'));
+    console.log('\n' + italic('New DAO with Admin plugin...'));
     console.log(green(`Using admin address: ${red(bold(admin))}\n`));
     console.groupEnd();
     const deployemnt = defaultAbiCoder.encode(['address'], [admin]);
