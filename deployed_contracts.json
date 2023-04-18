@@ -1,0 +1,10 @@
+{
+  "hardhat": {
+    "TokensaleSetup": "0x92A00fc48Ad3dD4A8b5266a8F467a52Ac784fC83",
+    "PluginRepo": "0x00E0B50f1fb27b03DE3a6608Bb587C8aefd3d69c"
+  },
+  "goerli": {
+    "TokensaleSetup": "0x9f941dAd2970131bb6e51bB61C45935ef11fe827",
+    "PluginRepo": "0x2c665b72C4Ae12Ff074C7A0F4A0c8e2Cd5Ec975b"
+  }
+}

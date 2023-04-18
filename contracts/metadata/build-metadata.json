@@ -1,0 +1,15 @@
+{
+  "ui": "",
+  "change": "initial build",
+  "pluginSetupABI": {
+    "prepareInstallation": [
+      "IERC20MintableUpgradeable token",
+      "uint256 rate",
+      "uint256 weiLimit",
+      "uint256 startBlock",
+      "uint256 endBlock"
+    ],
+    "prepareUpdate": [],
+    "prepareUninstallation": ["IERC20MintableUpgradeable token"]
+  }
+}
