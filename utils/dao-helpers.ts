@@ -12,6 +12,13 @@ import {ADDRESS_ZERO} from '../test/simple-storage/simple-storage-common';
 import {findEventTopicLog} from './helpers';
 import {hexToBytes} from './strings';
 import {toUtf8Bytes} from '@ethersproject/strings';
+import {Address} from 'hardhat-deploy/types';
+import * as pc from 'picocolors';
+
+const green = pc.green;
+const italic = pc.italic;
+const red = pc.red;
+const bold = pc.bold;
 
 class DAOHelpers {
   private hre: HardhatRuntimeEnvironment;
@@ -69,21 +76,47 @@ class DAOHelpers {
   }
 
   public async getAdminPluginInstallData(
-    plugin: PluginRepo
+    address?: Address
   ): Promise<DAOFactory.PluginSettingsStruct> {
     const {hre, getPluginSetupRef} = this;
     const [deployer] = await hre.ethers.getSigners();
-    const deployemnt = defaultAbiCoder.encode(['address'], [deployer.address]);
+
+    const admin = address ? address : deployer.address;
+    console.group();
+    console.log(italic('\nDeploying Admin plugin...'));
+    console.log(green(`Using admin address: ${red(bold(admin))}\n`));
+    console.groupEnd();
+    const deployemnt = defaultAbiCoder.encode(['address'], [admin]);
 
     return {
-      pluginSetupRef: await getPluginSetupRef(plugin),
+      pluginSetupRef: await getPluginSetupRef(await this.getRepo('admin-repo')),
       data: hexToBytes(deployemnt),
     };
   }
 
-  public async getRepo(address: string) {
+  // public async getTokenVotingInstallData(
+  //   address?: Address
+  // ): Promise<DAOFactory.PluginSettingsStruct> {
+  //   const {hre, getPluginSetupRef} = this;
+  //   const [deployer] = await hre.ethers.getSigners();
+
+  // }
+
+  public async getRepo(repo: MainnetRepos | PolygonRepos) {
     const {hre} = this;
+    const {network} = hre;
     const [deployer] = await hre.ethers.getSigners();
+
+    const address =
+      network.name === 'localhost' ||
+      network.name === 'hardhat' ||
+      network.name === 'coverage'
+        ? // @ts-ignore
+          activeContractsList.mainnet[repo]
+        : // @ts-ignore
+          activeContractsList[network.name as keyof typeof activeContractsList][
+            repo
+          ];
 
     return PluginRepo__factory.connect(address, deployer) as PluginRepo;
   }
@@ -111,3 +144,11 @@ export function createDaoHelpers(hre: HardhatRuntimeEnvironment) {
     getPluginSetupRef: daoHelpers.getPluginSetupRef.bind(daoHelpers),
   };
 }
+
+type MainnetRepos =
+  | keyof typeof activeContractsList.mainnet
+  | keyof typeof activeContractsList.goerli;
+
+type PolygonRepos =
+  | keyof typeof activeContractsList.polygon
+  | keyof typeof activeContractsList.mumbai;

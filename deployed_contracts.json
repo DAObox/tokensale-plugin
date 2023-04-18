@@ -5,6 +5,7 @@
   },
   "goerli": {
     "TokensaleSetup": "0x9f941dAd2970131bb6e51bB61C45935ef11fe827",
-    "PluginRepo": "0x2c665b72C4Ae12Ff074C7A0F4A0c8e2Cd5Ec975b"
+    "PluginRepo": "0x2c665b72C4Ae12Ff074C7A0F4A0c8e2Cd5Ec975b",
+    "Admin_DAO": "0xF03968c63bCFba94134B05D7d3ca09D38AFE945b"
   }
 }

@@ -9,7 +9,7 @@ import {addDeployedContract} from '../../utils/helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {network} = hre;
-  const {getRepo, getAdminPluginInstallData, createDao} = createDaoHelpers(hre);
+  const {getAdminPluginInstallData, createDao} = createDaoHelpers(hre);
 
   // 01. set dao metadata
   const daoMetadata = {
@@ -26,9 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     daoURI: 'https://daobox.app',
   };
 
-  const adminRepo = await getRepo('0xF66348E9865bb0f29B889E7c0FE1BCf4acAb5f54');
-
-  const installData = await getAdminPluginInstallData(adminRepo);
+  const installData = await getAdminPluginInstallData();
 
   const dao = await createDao(daoSettings, [installData]);
 
