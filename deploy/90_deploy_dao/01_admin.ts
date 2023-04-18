@@ -1,124 +1,39 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {
-  activeContractsList,
-  DAOFactory,
-  DAOFactory__factory,
-  PluginRepo__factory,
-  Addresslist__factory,
-  PluginRepo,
-} from '@aragon/osx-ethers';
+import {DAOFactory} from '@aragon/osx-ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {defaultAbiCoder} from '@ethersproject/abi';
-import {hexToBytes} from '../../utils/strings';
-
-const ADDRESS_ZERO = `0x${'0'.repeat(40)}`;
+import {createDaoHelpers} from '../../utils/dao-helpers';
+import {uploadToIPFS} from '../../utils/ipfs-upload';
+import {ADDRESS_ZERO} from '../../test/simple-storage/simple-storage-common';
+import {addDeployedContract} from '../../utils/helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  // 01. get the dao factory
-  const daoFactory = await getDaoFactory(hre);
-  const [deployer] = await hre.ethers.getSigners();
+  const {network} = hre;
+  const {getRepo, getAdminPluginInstallData, createDao} = createDaoHelpers(hre);
 
-  // 02. create the dao settings
-  const daoSettings: DAOFactory.DAOSettingsStruct = {
-    trustedForwarder: ADDRESS_ZERO,
-    daoURI: 'https://daobox.app',
-    subdomain: 'testingggg',
-    metadata: '0x00',
+  // 01. set dao metadata
+  const daoMetadata = {
+    name: 'DAO Box',
+    description: 'DAOBox Maxi',
+    links: [],
   };
 
-  // 03. create the plugin settings
-  const pluginSettings: DAOFactory.PluginSettingsStruct =
-    await getAdminPluginInstallData(hre);
+  // 02. set dao settings
+  const daoSettings: DAOFactory.DAOSettingsStruct = {
+    metadata: await uploadToIPFS(JSON.stringify(daoMetadata)),
+    subdomain: 'testingggg' + Math.floor(Math.random() * 1000000),
+    trustedForwarder: ADDRESS_ZERO,
+    daoURI: 'https://daobox.app',
+  };
 
-  const address = await getAragonAddress('admin-repo', hre);
+  const adminRepo = await getRepo('0xF66348E9865bb0f29B889E7c0FE1BCf4acAb5f54');
 
-  const adminRepo = PluginRepo__factory.connect(address, deployer);
-  console.log(await adminRepo.latestRelease());
+  const installData = await getAdminPluginInstallData(adminRepo);
 
-  // const adminPlugin =  function getRepo("admin-repo", hre);
+  const dao = await createDao(daoSettings, [installData]);
 
-  // 04. create the dao
-  // const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
-
-  // console.log(tx);
+  addDeployedContract(network.name, 'Admin_DAO', dao);
 };
 
 export default func;
 func.tags = ['Admin_DAO'];
-
-export async function getDaoFactory(hre: HardhatRuntimeEnvironment) {
-  const {network} = hre;
-  const [deployer] = await hre.ethers.getSigners();
-
-  const daoFactoryAddress =
-    network.name === 'localhost' ||
-    network.name === 'hardhat' ||
-    network.name === 'coverage'
-      ? activeContractsList.mainnet.DAOFactory
-      : activeContractsList[network.name as keyof typeof activeContractsList]
-          .DAOFactory;
-
-  return DAOFactory__factory.connect(daoFactoryAddress, deployer);
-}
-
-export async function getAdminPluginInstallData(
-  hre: HardhatRuntimeEnvironment
-): Promise<DAOFactory.PluginSettingsStruct> {
-  const {network} = hre;
-  const [deployer] = await hre.ethers.getSigners();
-
-  const adminRepoAddress =
-    network.name === 'localhost' ||
-    network.name === 'hardhat' ||
-    network.name === 'coverage'
-      ? activeContractsList.mainnet.DAOFactory
-      : activeContractsList[network.name as keyof typeof activeContractsList]
-          .DAOFactory;
-
-  const deployemnt = defaultAbiCoder.encode(['address'], [deployer.address]);
-
-  return {
-    pluginSetupRef: getPluginSetupRefStruct(adminRepoAddress),
-    data: hexToBytes(deployemnt),
-  };
-}
-
-// TODO: this should call the repo and get the latest version
-function getPluginSetupRefStruct(repoAddress: string) {
-  const versionTag: PluginRepo.TagStruct = {
-    release: 1,
-    build: 1,
-  };
-
-  return {
-    versionTag,
-    pluginSetupRepo: repoAddress,
-  };
-}
-
-async function getAragonAddress(
-  name: keyof typeof activeContractsList.mainnet,
-  hre: HardhatRuntimeEnvironment
-) {
-  const {network} = hre;
-  const [deployer] = await hre.ethers.getSigners();
-
-  return network.name === 'localhost' ||
-    network.name === 'hardhat' ||
-    network.name === 'coverage'
-    ? activeContractsList.mainnet.DAOFactory
-    : activeContractsList[network.name as keyof typeof activeContractsList][
-        name
-      ];
-}
-
-async function getRepo(
-  name: keyof typeof activeContractsList.mainnet,
-  hre: HardhatRuntimeEnvironment
-) {
-  const [deployer] = await hre.ethers.getSigners();
-
-  const address = await getAragonAddress(name, hre);
-  return PluginRepo__factory.connect(address, deployer);
-}

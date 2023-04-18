@@ -87,9 +87,9 @@ for (const network in networks) {
 }
 
 // Extend HardhatRuntimeEnvironment
-extendEnvironment((hre: HardhatRuntimeEnvironment) => {
-  hre.aragonToVerifyContracts = [];
-});
+// extendEnvironment((hre: HardhatRuntimeEnvironment) => {
+//   hre.aragonToVerifyContracts = [];
+// });
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',

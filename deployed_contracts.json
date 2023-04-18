@@ -1,6 +1,6 @@
 {
   "hardhat": {
-    "TokensaleSetup": "0x92A00fc48Ad3dD4A8b5266a8F467a52Ac784fC83",
+    "TokensaleSetup": "0x9368c1f9A0350d4F33807351ad308A2a6bCB695C",
     "PluginRepo": "0x00E0B50f1fb27b03DE3a6608Bb587C8aefd3d69c"
   },
   "goerli": {
